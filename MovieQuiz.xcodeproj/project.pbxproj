@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1FB4A3B52EDFAD5F0032BADD /* QuizModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FB4A3B42EDFAD5F0032BADD /* QuizModels.swift */; };
 		1FFD2C3E2EAA887D00FBE7DE /* YS Display-Medium.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 1FFD2C3D2EAA887D00FBE7DE /* YS Display-Medium.ttf */; };
 		1FFD2C3F2EAA887D00FBE7DE /* YS Display-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 1FFD2C3C2EAA887D00FBE7DE /* YS Display-Bold.ttf */; };
 		AD1ABAB22831907B00B3E448 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD1ABAB12831907B00B3E448 /* AppDelegate.swift */; };
@@ -21,6 +22,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		1FB4A3B42EDFAD5F0032BADD /* QuizModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuizModels.swift; sourceTree = "<group>"; };
 		1FFD2C3C2EAA887D00FBE7DE /* YS Display-Bold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "YS Display-Bold.ttf"; sourceTree = "<group>"; };
 		1FFD2C3D2EAA887D00FBE7DE /* YS Display-Medium.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "YS Display-Medium.ttf"; sourceTree = "<group>"; };
 		AD1ABAAE2831907B00B3E448 /* MovieQuiz.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MovieQuiz.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -59,6 +61,7 @@
 		611342392B701CF6003FC2A4 /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				1FB4A3B42EDFAD5F0032BADD /* QuizModels.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -204,6 +207,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1FB4A3B52EDFAD5F0032BADD /* QuizModels.swift in Sources */,
 				AD5EE5DE284D7887003966EF /* UIColor+Extensions.swift in Sources */,
 				AD7AFA552836189F00399704 /* Array+Extensions.swift in Sources */,
 				AD1ABAB62831907B00B3E448 /* MovieQuizViewController.swift in Sources */,
