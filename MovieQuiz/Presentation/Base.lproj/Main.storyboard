@@ -128,6 +128,8 @@
                         <outlet property="counterLabel" destination="index-label" id="9dd-Ej-Ix6"/>
                         <outlet property="imageView" destination="preview-image" id="RJp-c5-Gkt"/>
                         <outlet property="textLabel" destination="question-label" id="text-label-outlet"/>
+                        <outlet property="yesButton" destination="xm0-QA-iyI" id="yes-button-outlet"/>
+                        <outlet property="noButton" destination="dHI-6x-0QB" id="no-button-outlet"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
