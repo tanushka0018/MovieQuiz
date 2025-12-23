@@ -8,7 +8,11 @@
 import Foundation
 
 final class StatisticService: StatisticServiceProtocol {
+    // MARK: - Private properties
+    
     private let storage: UserDefaults = .standard
+    
+    // MARK: - Private types
     
     private enum Keys: String {
         case gamesCount
@@ -18,6 +22,8 @@ final class StatisticService: StatisticServiceProtocol {
         case totalCorrectAnswers
         case totalQuestionsAsked
     }
+    
+    // MARK: - Public properties (StatisticServiceProtocol)
     
     var gamesCount: Int {
         get {
@@ -33,6 +39,7 @@ final class StatisticService: StatisticServiceProtocol {
             let correct = storage.integer(forKey: Keys.bestGameCorrect.rawValue)
             let total = storage.integer(forKey: Keys.bestGameTotal.rawValue)
             let date = storage.object(forKey: Keys.bestGameDate.rawValue) as? Date ?? Date()
+            
             return GameResult(correct: correct, total: total, date: date)
         }
         set {
@@ -41,6 +48,13 @@ final class StatisticService: StatisticServiceProtocol {
             storage.set(newValue.date, forKey: Keys.bestGameDate.rawValue)
         }
     }
+    
+    var totalAccuracy: Double {
+        guard totalQuestionsAsked > 0 else { return 0 }
+        return Double(totalCorrectAnswers) / Double(totalQuestionsAsked) * 100
+    }
+    
+    // MARK: - Private properties
     
     private var totalCorrectAnswers: Int {
         get {
@@ -60,19 +74,10 @@ final class StatisticService: StatisticServiceProtocol {
         }
     }
     
-    var totalAccuracy: Double {
-        get {
-            guard totalQuestionsAsked > 0 else {
-                return 0
-            }
-            
-            return (Double(totalCorrectAnswers) / Double(totalQuestionsAsked)) * 100
-        }
-    }
+    // MARK: - Public methods
     
     func store(correct count: Int, total amount: Int) {
         gamesCount += 1
-        
         totalCorrectAnswers += count
         totalQuestionsAsked += amount
         
