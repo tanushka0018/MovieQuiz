@@ -6,10 +6,9 @@
 //
 
 import Foundation
-import UIKit
 
 struct QuizQuestion {
-    let image: String
+    let imageData: Data
     let text: String
     let correctAnswer: Bool
 }
