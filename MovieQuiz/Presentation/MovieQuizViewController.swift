@@ -30,6 +30,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         
         imageView.layer.masksToBounds = true
         imageView.layer.cornerRadius = 20
+        activityIndicator.hidesWhenStopped = true
         questionFactory = QuestionFactory(moviesLoader: MoviesLoader(), delegate: self)
 
         showLoadingIndicator()
@@ -44,8 +45,8 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         currentQuestion = question
         let viewModel = convert(model: question)
         
-        DispatchQueue.main.async { [weak self] in
-            self?.show(quiz: viewModel)
+        DispatchQueue.main.async {
+            self.show(quiz: viewModel)
         }
     }
     
@@ -55,16 +56,16 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     }
     
     func didFailToLoadData(with error: Error) {
-        DispatchQueue.main.async { [weak self] in
-            self?.showNetworkError(message: error.localizedDescription)
+        DispatchQueue.main.async {
+            self.showNetworkError(message: error.localizedDescription)
         }
     }
     
     // MARK: - Quiz presentation
     
     private func convert(model: QuizQuestion) -> QuizStepViewModel {
-        return QuizStepViewModel(
-            image: UIImage(data: model.image) ?? UIImage(),
+        QuizStepViewModel(
+            image: UIImage(data: model.imageData) ?? UIImage(),
             question: model.text,
             questionNumber: "\(currentQuestionIndex + 1)/\(questionsAmount)")
     }
@@ -83,7 +84,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
             message: result.text,
             buttonText: result.buttonText
         ) { [weak self] in
-            guard let self = self else { return }
+            guard let self else { return }
             self.resetGame()
             self.requestFirstQuestion()
         }
@@ -103,8 +104,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         updateScoreIfNeeded(isCorrect)
         highlightAnswer(isCorrect)
         
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
-            guard let self = self else { return }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
             self.isAnswerInProgress = false
             self.showNextQuestionOrResults()
         }
@@ -189,12 +189,10 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     // MARK: LoadingIndicator
     
     private func showLoadingIndicator() {
-        activityIndicator.isHidden = false
         activityIndicator.startAnimating()
     }
     
     private func hideLoadingIndicator() {
-        activityIndicator.isHidden = true
         activityIndicator.stopAnimating()
     }
     
@@ -217,7 +215,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         let model = AlertModel(title: "Ошибка",
                                message: message,
                                buttonText: "Попробовать еще раз") { [weak self] in
-            guard let self = self else { return }
+            guard let self else { return }
             
             self.currentQuestionIndex = 0
             self.correctAnswers = 0

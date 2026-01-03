@@ -14,6 +14,8 @@ protocol MoviesLoading {
 struct MoviesLoader: MoviesLoading {
     
     // MARK: - NetworkClient
+    private let networkClient = NetworkClient()
+    private let jsonDecoder = JSONDecoder()
     private let networkClient: NetworkRouting
     
     init(networkClient: NetworkRouting = NetworkClient()) {
@@ -33,7 +35,19 @@ struct MoviesLoader: MoviesLoading {
             switch result {
             case .success(let data):
                 do {
-                    let mostPopularMovies = try JSONDecoder().decode(MostPopularMovies.self, from: data)
+                    let mostPopularMovies = try self.jsonDecoder.decode(MostPopularMovies.self, from: data)
+                    
+                    // Check for error message in response
+                    if !mostPopularMovies.errorMessage.isEmpty {
+                        let error = NSError(
+                            domain: "MoviesLoader",
+                            code: -1,
+                            userInfo: [NSLocalizedDescriptionKey: mostPopularMovies.errorMessage]
+                        )
+                        handler(.failure(error))
+                        return
+                    }
+                    
                     handler(.success(mostPopularMovies))
                 } catch {
                     handler(.failure(error))
