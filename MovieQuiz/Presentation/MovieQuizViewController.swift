@@ -1,6 +1,6 @@
 import UIKit
 
-final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
+final class MovieQuizViewController: UIViewController {
     // MARK: - IBOutlets
     
     @IBOutlet private weak var imageView: UIImageView!
@@ -11,7 +11,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     @IBOutlet private var activityIndicator: UIActivityIndicatorView!
     
     // MARK: - Private properties
-    private let presenter = MovieQuizPresenter()
+    private var presenter: MovieQuizPresenter!
     private let alertPresenter = AlertPresenter()
     
     // MARK: - Lifecycle
@@ -19,33 +19,11 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        presenter.viewController = self
+        presenter = MovieQuizPresenter(viewController: self)
         
         imageView.layer.masksToBounds = true
         imageView.layer.cornerRadius = 20
         activityIndicator.hidesWhenStopped = true
-        
-        presenter.questionFactory = QuestionFactory(moviesLoader: MoviesLoader(), delegate: self)
-
-        showLoadingIndicator()
-        presenter.questionFactory?.loadData()
-    }
-    
-    // MARK: - QuestionFactoryDelegate
-    
-    func didReceiveNextQuestion(question: QuizQuestion?) {
-        presenter.didReceiveNextQuestion(question: question)
-    }
-    
-    func didLoadDataFromServer() {
-        hideLoadingIndicator()
-        presenter.questionFactory?.requestNextQuestion()
-    }
-    
-    func didFailToLoadData(with error: Error) {
-        DispatchQueue.main.async {
-            self.showNetworkError(message: error.localizedDescription)
-        }
     }
     
     // MARK: - Quiz presentation
@@ -63,22 +41,24 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         noButton.isEnabled = isEnabled
     }
     
-    func highlightAnswer(_ isCorrect: Bool) {
+    func highlightImageBorder(isCorrectAnswer: Bool) {
+        imageView.layer.masksToBounds = true
         imageView.layer.borderWidth = 8
-        imageView.layer.borderColor = isCorrect
+        imageView.layer.borderColor = isCorrectAnswer
             ? UIColor.ypGreen.cgColor
             : UIColor.ypRed.cgColor
     }
     
     func show(quiz result: QuizResultsViewModel) {
+        let message = presenter.makeResultsMessage()
+        
         let alertModel = AlertModel(
             title: result.title,
-            message: result.text,
+            message: message,
             buttonText: result.buttonText
         ) { [weak self] in
             guard let self else { return }
-            self.presenter.resetGame()
-            self.requestFirstQuestion()
+            self.presenter.restartGame()
         }
         
         alertPresenter.show(in: self, model: alertModel)
@@ -96,23 +76,17 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     
     // MARK: LoadingIndicator
     
-    private func showLoadingIndicator() {
+    func showLoadingIndicator() {
         activityIndicator.startAnimating()
     }
     
-    private func hideLoadingIndicator() {
+    func hideLoadingIndicator() {
         activityIndicator.stopAnimating()
-    }
-    
-    // MARK: Question flow
-    
-    func requestFirstQuestion() {
-        presenter.questionFactory?.requestNextQuestion()
     }
     
     // MARK: Error handling
     
-    private func showNetworkError(message: String) {
+    func showNetworkError(message: String) {
         hideLoadingIndicator()
         
         let model = AlertModel(title: "Ошибка",
@@ -120,10 +94,8 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
                                buttonText: "Попробовать еще раз") { [weak self] in
             guard let self else { return }
             
-            self.presenter.resetGame()
-            
             self.showLoadingIndicator()
-            self.presenter.questionFactory?.loadData()
+            self.presenter.restartGame()
         }
         
         alertPresenter.show(in: self, model: model)
