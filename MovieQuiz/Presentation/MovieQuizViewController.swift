@@ -12,9 +12,8 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     
     // MARK: - Private properties
     
-    private var currentQuestionIndex = 0
+    private let presenter = MovieQuizPresenter()
     private var correctAnswers = 0
-    private let questionsAmount = 10
     
     private var currentQuestion: QuizQuestion?
     private var isAnswerInProgress = false
@@ -43,7 +42,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         guard let question = question else { return }
         
         currentQuestion = question
-        let viewModel = convert(model: question)
+        let viewModel = presenter.convert(model: question)
         
         DispatchQueue.main.async {
             self.show(quiz: viewModel)
@@ -62,13 +61,6 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     }
     
     // MARK: - Quiz presentation
-    
-    private func convert(model: QuizQuestion) -> QuizStepViewModel {
-        QuizStepViewModel(
-            image: UIImage(data: model.imageData) ?? UIImage(),
-            question: model.text,
-            questionNumber: "\(currentQuestionIndex + 1)/\(questionsAmount)")
-    }
     
     private func show(quiz step: QuizStepViewModel) {
         imageView.image = step.image
@@ -131,16 +123,16 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     // MARK: Game flow
     
     private func showNextQuestionOrResults() {
-        if currentQuestionIndex == questionsAmount - 1 {
+        if presenter.isLastQuestion() {
             finishRound()
         } else {
-            currentQuestionIndex += 1
+            presenter.switchToNextQuestion()
             requestFirstQuestion()
         }
     }
     
     private func finishRound() {
-        statisticService.store(correct: correctAnswers, total: questionsAmount)
+        statisticService.store(correct: correctAnswers, total: presenter.questionsAmount)
         
         let resultText = makeResultText()
         let viewModel = QuizResultsViewModel(
@@ -155,7 +147,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     // MARK: Result
     
     private func makeResultText() -> String {
-        let currentResult = "Ваш результат: \(correctAnswers)/\(questionsAmount)"
+        let currentResult = "Ваш результат: \(correctAnswers)/\(presenter.questionsAmount)"
         let gamesCount = "Количество сыгранных квизов: \(statisticService.gamesCount)"
         
         let bestGame = statisticService.bestGame
@@ -172,7 +164,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     // MARK: Reset
     
     private func resetGame() {
-        currentQuestionIndex = 0
+        presenter.resetQuestionIndex()
         correctAnswers = 0
     }
     
@@ -217,7 +209,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
                                buttonText: "Попробовать еще раз") { [weak self] in
             guard let self else { return }
             
-            self.currentQuestionIndex = 0
+            self.presenter.resetQuestionIndex()
             self.correctAnswers = 0
             
             self.showLoadingIndicator()
