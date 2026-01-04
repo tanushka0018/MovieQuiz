@@ -12,7 +12,6 @@ final class MovieQuizViewController: UIViewController {
     
     // MARK: - Private properties
     private var presenter: MovieQuizPresenter!
-    private let alertPresenter = AlertPresenter()
     
     // MARK: - Lifecycle
     
@@ -21,24 +20,16 @@ final class MovieQuizViewController: UIViewController {
         
         presenter = MovieQuizPresenter(viewController: self)
         
-        imageView.layer.masksToBounds = true
         imageView.layer.cornerRadius = 20
-        activityIndicator.hidesWhenStopped = true
     }
     
     // MARK: - Quiz presentation
     
     func show(quiz step: QuizStepViewModel) {
+        imageView.layer.borderColor = UIColor.clear.cgColor
         imageView.image = step.image
         textLabel.text = step.question
         counterLabel.text = step.questionNumber
-        imageView.layer.borderWidth = 0
-        setAnswerButtonsEnabled(true)
-    }
-    
-    func setAnswerButtonsEnabled(_ isEnabled: Bool) {
-        yesButton.isEnabled = isEnabled
-        noButton.isEnabled = isEnabled
     }
     
     func highlightImageBorder(isCorrectAnswer: Bool) {
@@ -52,19 +43,23 @@ final class MovieQuizViewController: UIViewController {
     func show(quiz result: QuizResultsViewModel) {
         let message = presenter.makeResultsMessage()
         
-        let alertModel = AlertModel(
+        let alert = UIAlertController(
             title: result.title,
             message: message,
-            buttonText: result.buttonText
-        ) { [weak self] in
-            guard let self else { return }
+            preferredStyle: .alert)
+        
+        let action = UIAlertAction(title: result.buttonText, style: .default) { [weak self] _ in
+            guard let self = self else { return }
+            
             self.presenter.restartGame()
         }
         
-        alertPresenter.show(in: self, model: alertModel)
+        alert.addAction(action)
+        
+        self.present(alert, animated: true, completion: nil)
     }
     
-    // MARK: - IBActions
+    // MARK: - Actions
     
     @IBAction private func yesButtonClicked(_ sender: UIButton) {
         presenter.yesButtonClicked()
@@ -74,30 +69,33 @@ final class MovieQuizViewController: UIViewController {
         presenter.noButtonClicked()
     }
     
-    // MARK: LoadingIndicator
-    
     func showLoadingIndicator() {
+        activityIndicator.isHidden = false
         activityIndicator.startAnimating()
     }
     
     func hideLoadingIndicator() {
-        activityIndicator.stopAnimating()
+        activityIndicator.isHidden = true
     }
-    
-    // MARK: Error handling
     
     func showNetworkError(message: String) {
         hideLoadingIndicator()
         
-        let model = AlertModel(title: "Ошибка",
-                               message: message,
-                               buttonText: "Попробовать еще раз") { [weak self] in
-            guard let self else { return }
-            
-            self.showLoadingIndicator()
-            self.presenter.restartGame()
-        }
+        let alert = UIAlertController(
+            title: "Ошибка",
+            message: message,
+            preferredStyle: .alert)
         
-        alertPresenter.show(in: self, model: model)
+        let action = UIAlertAction(title: "Попробовать ещё раз",
+            style: .default) { [weak self] _ in
+                guard let self = self else { return }
+                
+                self.showLoadingIndicator()
+                self.presenter.restartGame()
+            }
+        
+        alert.addAction(action)
+        
+        self.present(alert, animated: true, completion: nil)
     }
 }
