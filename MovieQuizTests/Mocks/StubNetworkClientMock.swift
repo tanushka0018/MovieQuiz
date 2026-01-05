@@ -1,5 +1,5 @@
 //
-//  StubNetworkClient.swift
+//  StubNetworkClientMock.swift
 //  MovieQuiz
 //
 //  Created by Tatiana on 1/5/26.
